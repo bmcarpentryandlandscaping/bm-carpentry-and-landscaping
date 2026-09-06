@@ -1,10 +1,5 @@
 import type { Metadata } from "next";
 import { Hanken_Grotesk } from "next/font/google";
-import { Cursor } from "@/components/Cursor";
-import { Loader } from "@/components/Loader";
-import { SiteFooter } from "@/components/SiteFooter";
-import { SiteNav } from "@/components/SiteNav";
-import { SmoothScroll } from "@/components/SmoothScroll";
 import { brand } from "@/lib/brand";
 import "./globals.css";
 
@@ -96,21 +91,13 @@ const jsonLd = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html
-      lang="en"
-      className={hanken.variable}
-    >
+    <html lang="en" className={hanken.variable}>
       <body>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
-        <SmoothScroll />
-        <Cursor />
-        <Loader />
-        <SiteNav />
-        <main className="min-h-dvh">{children}</main>
-        <SiteFooter />
+        {children}
       </body>
     </html>
   );

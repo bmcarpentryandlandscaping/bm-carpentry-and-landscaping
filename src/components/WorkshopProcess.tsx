@@ -11,44 +11,6 @@ if (typeof window !== "undefined") {
 
 type Stage = { n: string; name: string; img: string; cap: string; alt: string };
 
-const STAGES: Stage[] = [
-  {
-    n: "01",
-    name: "Frame",
-    img: "/images/avalon-6.webp",
-    cap: "Structural timber framing set out across three terrace levels.",
-    alt: "Structural timber framing meeting the new deck levels at Earlwood",
-  },
-  {
-    n: "02",
-    name: "Clad",
-    img: "/images/avalon-5.webp",
-    cap: "Vertical timber cladding, unifying the facade in low sun.",
-    alt: "Timber cladding running up the facade, lit at sunset",
-  },
-  {
-    n: "03",
-    name: "Deck",
-    img: "/images/campsie-5.webp",
-    cap: "Hardwood decking laid by hand, every junction mitered.",
-    alt: "Carpenter laying hardwood decking boards over the timber frame",
-  },
-  {
-    n: "04",
-    name: "Plant",
-    img: "/images/earlwood-1.webp",
-    cap: "Zoned irrigation and dense, terraced planting go in.",
-    alt: "Newly planted terraced garden beds with irrigation",
-  },
-  {
-    n: "05",
-    name: "Settle",
-    img: "/images/earlwood-3.webp",
-    cap: "The finished garden, resolved and reading at dusk.",
-    alt: "The completed Earlwood garden and clad home at dusk",
-  },
-];
-
 const LIGHT = { color: "var(--surface-deep-foreground)" } as const;
 
 /**
@@ -65,7 +27,7 @@ const LIGHT = { color: "var(--surface-deep-foreground)" } as const;
  * Touch / reduced-motion: collapses to a native, snap-scrolling filmstrip with
  * every caption and index composed statically.
  */
-export function WorkshopProcess() {
+export function WorkshopProcess({ stages }: { stages: Stage[] }) {
   const stage = useRef<HTMLElement | null>(null);
   const rail = useRef<HTMLDivElement | null>(null);
   const barRef = useRef<HTMLSpanElement | null>(null);
@@ -224,9 +186,9 @@ export function WorkshopProcess() {
           {!native && (
             <p className="eyebrow tabular-nums opacity-75">
               <span ref={counterRef}>01</span>
-              <span className="opacity-40"> / 0{STAGES.length}</span>
+              <span className="opacity-40"> / {String(stages.length).padStart(2, "0")}</span>
               <span className="mx-2.5 opacity-30">·</span>
-              <span ref={nameRef}>{STAGES[0].name}</span>
+              <span ref={nameRef}>{stages[0]?.name ?? ""}</span>
             </p>
           )}
         </div>
@@ -265,7 +227,7 @@ export function WorkshopProcess() {
           </div>
 
           {/* Stage panels */}
-          {STAGES.map((s) => (
+          {stages.map((s) => (
             <article
               key={s.n}
               data-stage

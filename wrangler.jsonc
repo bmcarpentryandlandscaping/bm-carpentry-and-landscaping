@@ -1,0 +1,24 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "bm-carpentry",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "observability": { "enabled": true },
+  "kv_namespaces": [
+    // Incremental (ISR) cache AND the login throttle of spec §6.3.
+    { "binding": "NEXT_INC_CACHE_KV", "id": "REPLACE_IN_TASK_2" }
+  ],
+  "d1_databases": [
+    // Tag cache — what makes revalidateTag() purge the public page.
+    {
+      "binding": "NEXT_TAG_CACHE_D1",
+      "database_name": "bm-carpentry-tags",
+      "database_id": "REPLACE_IN_TASK_2"
+    }
+  ]
+}

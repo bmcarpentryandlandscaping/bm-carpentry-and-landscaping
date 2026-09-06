@@ -25,22 +25,6 @@ export type GalleryItem = {
 /** Filter chips, in display order. "All" is prepended in the UI. */
 export const CATEGORIES = ["Pools", "Gardens", "Carpentry", "Courtyards", "Coastal"] as const;
 
-// Photo pool — grouped by what reads best per category.
-const POOL = ["/images/earlwood-2.webp", "/images/campsie-4.webp"];
-const GARDEN = [
-  "/images/avalon-2.webp",
-  "/images/avalon-3.webp",
-  "/images/avalon-4.webp",
-  "/images/earlwood-3.webp",
-];
-const TIMBER = [
-  "/images/earlwood-1.webp",
-  "/images/campsie-2.webp",
-  "/images/campsie-1.webp",
-  "/images/avalon-1.webp",
-];
-const COAST = ["/images/avalon-1.webp", "/images/earlwood-2.webp", "/images/campsie-3.webp"];
-
 export const galleryItems: GalleryItem[] = [
   {
     id: "g01",
@@ -218,11 +202,11 @@ export function getProject(slug: string): GalleryItem | undefined {
 }
 
 /** The next `n` projects after `slug`, wrapping around the list. */
-export function getMoreProjects(slug: string, n = 3): GalleryItem[] {
-  const start = galleryItems.findIndex((g) => projectSlug(g) === slug);
+export function getMoreProjects(items: GalleryItem[], slug: string, n = 3): GalleryItem[] {
+  const start = items.findIndex((g) => projectSlug(g) === slug);
   const out: GalleryItem[] = [];
-  for (let k = 1; out.length < n && k <= galleryItems.length; k++) {
-    const item = galleryItems[(start + k) % galleryItems.length];
+  for (let k = 1; out.length < n && k <= items.length; k++) {
+    const item = items[(start + k) % items.length];
     if (item) out.push(item);
   }
   return out;

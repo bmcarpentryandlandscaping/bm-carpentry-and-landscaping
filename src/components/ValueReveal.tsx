@@ -1,7 +1,7 @@
 import { Reveal } from "@/components/Reveal";
-import { MapPinHouseIcon, Recycle, TreePalm } from "lucide-react";
+import { Armchair, Hourglass, TreePalm } from "lucide-react";
 
-export type ValueIcon = "leaf" | "pin" | "recycle";
+export type ValueIcon = "leaf" | "chair" | "hourglass";
 
 export type ValueItem = {
   icon: ValueIcon;
@@ -12,8 +12,10 @@ export type ValueItem = {
 /** Hand-drawn, single-stroke line icons — no generic icon library. */
 const ICONS: Record<ValueIcon, React.ReactNode> = {
   leaf: <TreePalm size={60} strokeWidth={1.5} />,
-  pin: <MapPinHouseIcon size={60} strokeWidth={2} />,
-  recycle: <Recycle size={60} strokeWidth={2} />,
+  // Usability is about a space you actually sit in, and longevity about how it
+  // performs over years — a map pin and a recycling mark said neither.
+  chair: <Armchair size={60} strokeWidth={1.5} />,
+  hourglass: <Hourglass size={60} strokeWidth={1.5} />,
 };
 
 /**

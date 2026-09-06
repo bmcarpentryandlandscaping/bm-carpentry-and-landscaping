@@ -1,46 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import type { Disciplines } from "@/lib/schemas";
 
-type Practice = {
-  label: string;
-  blurb: string;
-  img: string;
-  alt: string;
-};
-
-const practices: Practice[] = [
-  {
-    label: "Design",
-    blurb:
-      "From your initial consultation through to the finished product, we guide you through all the steps needed to achieve your vision.",
-    img: "/images/dsc09432_hdr.webp",
-    alt: "Modern timber-clad home opening onto a designed lawn at dusk",
-  },
-  {
-    label: "Landscaping",
-    blurb:
-      "From retaining walls and paving to hardscapes and softscapes, we provide complete landscaping solutions tailored to your space.",
-    img: "/images/avalon-3.webp",
-    alt: "Landscaped garden beds, paving and lawn at Avalon Beach",
-  },
-  {
-    label: "Carpentry",
-    blurb:
-      "Structural and finish carpentry, decking and cladding, every aspect hand built by our own team.",
-    img: "/images/page_4_img_6.jpg",
-    alt: "Handcrafted timber landscape stairs meeting a sandstone retaining wall",
-  },
-  {
-    label: "Garden Maintenance",
-    blurb:
-      "Whether it's maintaining your garden after installation or giving an existing outdoor space the care it needs, our team can help keep your landscape looking its best all year round.",
-    img: "/images/campsie-2.webp",
-    alt: "Established garden beds and lawn maturing along a rendered wall",
-  },
-];
-
-export function WhatWeDo() {
+export function WhatWeDo({ items }: { items: Disciplines["items"] }) {
   const [active, setActive] = useState(0);
 
   return (
@@ -54,7 +17,7 @@ export function WhatWeDo() {
                 tall as the longest one, so switching practice can't reflow the
                 list below it and bounce the row out from under the cursor. */}
             <div className="mt-7 grid max-w-md">
-              {practices.map((p, i) => (
+              {items.map((p, i) => (
                 <p
                   key={p.label}
                   aria-hidden={i !== active}
@@ -69,7 +32,7 @@ export function WhatWeDo() {
           </div>
 
           <ul className="flex flex-col">
-            {practices.map((p, i) => {
+            {items.map((p, i) => {
               const on = i === active;
               return (
                 <li key={p.label} className="border-t border-current/15 last:border-b">
@@ -105,7 +68,7 @@ export function WhatWeDo() {
 
         {/* RIGHT — crossfading showcase */}
         <div className="relative min-h-[58svh] overflow-hidden md:min-h-full bg-black">
-          {practices.map((p, i) => {
+          {items.map((p, i) => {
             const isVideo = p.img.endsWith(".mp4");
             const activeClass = i === active 
               ? "scale-100 opacity-100 pointer-events-auto" 

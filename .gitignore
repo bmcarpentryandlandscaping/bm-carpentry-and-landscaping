@@ -49,3 +49,8 @@ ref
 # Local design source assets + graphify scratch (not build inputs)
 _design-assets/
 graphify-out/
+
+# OpenNext / Wrangler build output
+.open-next/
+.wrangler/
+cloudflare-env.d.ts

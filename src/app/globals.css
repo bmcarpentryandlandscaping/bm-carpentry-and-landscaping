@@ -1495,3 +1495,159 @@
     }
   }
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   ADMIN — "the bench"
+   ══════════════════════════════════════════════════════════════════════════
+   The admin shares the site's palette and Hanken Grotesk, but none of its
+   motion system: no Lenis, no blend-mode cursor, no scroll choreography. Form
+   UI needs a visible caret and a scroll position that stays where it was put.
+
+   Two rules hold the whole thing together:
+     1. The photo is the product. Every editable image renders at its true
+        aspect and full column width, controls quiet beneath it — never a
+        thumbnail crammed beside a form.
+     2. Ochre is state, not decoration. It appears on the focus ring, the
+        live/hidden pip, and Save-when-dirty. Nowhere else. So colour always
+        means "this is something you can change".
+   ══════════════════════════════════════════════════════════════════════════ */
+@layer components {
+  /* ── page furniture ───────────────────────────────────────────────────── */
+  .admin-title {
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: -0.028em;
+    line-height: 1;
+    font-size: clamp(1.75rem, 1.2rem + 2.2vw, 2.5rem);
+  }
+
+  /* One plain sentence under a title. Capped at a readable measure rather
+     than running the full 6xl container width. */
+  .admin-lede {
+    max-width: 62ch;
+    color: var(--muted-foreground);
+    font-size: 0.9375rem;
+    line-height: 1.55;
+  }
+
+  /* The rule under a page header. Full-bleed to the container edge so it
+     reads as a setting-out line rather than a box. */
+  .admin-rule {
+    height: 1px;
+    background: linear-gradient(
+      to right,
+      var(--color-border) 0%,
+      var(--color-border) 72%,
+      transparent 100%
+    );
+  }
+
+  /* ── the plate: an image at its real aspect ───────────────────────────── */
+  .admin-plate {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    border-radius: var(--radius);
+    background: var(--muted);
+    /* A hairline inside the edge, so a light photo still has a boundary
+       without a heavy border eating into the image. */
+    box-shadow: inset 0 0 0 1px var(--color-border);
+  }
+  .admin-plate > img,
+  .admin-plate > video {
+    display: block;
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+  }
+  /* Empty state reads as an invitation, not an error. */
+  .admin-plate-empty {
+    display: flex;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    text-align: center;
+    font-size: 0.875rem;
+    color: var(--muted-foreground);
+  }
+
+  /* ── state pip: the one place ochre carries meaning ───────────────────── */
+  .admin-pip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8125rem;
+    color: var(--muted-foreground);
+  }
+  .admin-pip::before {
+    content: "";
+    height: 0.4rem;
+    width: 0.4rem;
+    border-radius: 9999px;
+    background: var(--color-border);
+  }
+  .admin-pip[data-live="true"] {
+    color: var(--foreground);
+  }
+  .admin-pip[data-live="true"]::before {
+    background: var(--accent);
+  }
+
+  /* ── nav: sliding underline, same idea as the public SiteNav ──────────── */
+  .admin-navlink {
+    position: relative;
+    padding: 0.5rem 0.125rem;
+    font-size: 0.9375rem;
+    color: var(--muted-foreground);
+    transition: color var(--dur-fast) var(--ease-out-quart);
+  }
+  .admin-navlink:hover {
+    color: var(--foreground);
+  }
+  .admin-navlink[aria-current="page"] {
+    color: var(--foreground);
+  }
+  .admin-navlink[aria-current="page"]::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    bottom: -1px;
+    height: 2px;
+    background: var(--foreground);
+  }
+
+  /* ── the bench edge: sticky save footer ───────────────────────────────── */
+  .admin-bench {
+    position: sticky;
+    bottom: 0;
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border-top: 1px solid var(--color-border);
+    background: color-mix(in oklch, var(--background) 92%, transparent);
+    backdrop-filter: blur(8px);
+    padding: 0.75rem 1.5rem;
+    margin-inline: -1.5rem;
+    margin-top: 2rem;
+  }
+
+  /* ── list rows (projects, media) ──────────────────────────────────────── */
+  .admin-row {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    background: var(--card);
+    transition: border-color var(--dur-fast) var(--ease-out-quart);
+  }
+  .admin-row:hover {
+    border-color: color-mix(in oklch, var(--foreground) 22%, transparent);
+  }
+
+  /* ── focus: one visible, consistent ring everywhere ───────────────────── */
+  .admin-scope :is(a, button, input, textarea, select, [tabindex]):focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+}

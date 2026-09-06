@@ -1,9 +1,10 @@
 import type { MetadataRoute } from "next";
-import { galleryItems, projectSlug } from "@/lib/gallery";
+import { getProjects } from "@/lib/content";
+import { projectSlug } from "@/lib/gallery";
 
 const base = "https://bmcarpentry.com.au";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes = [
     { url: "", priority: 1, changeFrequency: "monthly" as const },
     { url: "/services", priority: 0.9, changeFrequency: "monthly" as const },
@@ -13,7 +14,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/contact", priority: 0.8, changeFrequency: "yearly" as const },
   ].map((r) => ({ ...r, url: `${base}${r.url}`, lastModified: new Date() }));
 
-  const projectRoutes = galleryItems.map((item) => ({
+  const items = await getProjects();
+  const projectRoutes = items.map((item) => ({
     url: `${base}/projects/${projectSlug(item)}`,
     lastModified: new Date(),
     changeFrequency: "monthly" as const,

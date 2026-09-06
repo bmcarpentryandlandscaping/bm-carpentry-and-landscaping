@@ -1,0 +1,15 @@
+{
+  "default_branch": "main",
+  "branches": [
+    "feat/admin-cms",
+    "main"
+  ],
+  "parent": {
+    "feat/admin-cms": "main",
+    "main": null
+  },
+  "order": [
+    "main",
+    "feat/admin-cms"
+  ]
+}

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { CATEGORIES, galleryItems, projectSlug, type GallerySize } from "@/lib/gallery";
+import { CATEGORIES, projectSlug, type GalleryItem, type GallerySize } from "@/lib/gallery";
 
 const FILTERS = ["All", ...CATEGORIES] as const;
 
@@ -14,26 +14,23 @@ const ASPECT: Record<GallerySize, string> = {
   lg: "aspect-[3/4]",
 };
 
-export function ProjectGallery() {
+export function ProjectGallery({ items }: { items: GalleryItem[] }) {
   const [active, setActive] = useState<(typeof FILTERS)[number]>("All");
 
   const filtered = useMemo(
-    () =>
-      active === "All"
-        ? galleryItems
-        : galleryItems.filter((g) => g.categories.includes(active)),
-    [active],
+    () => (active === "All" ? items : items.filter((g) => g.categories.includes(active))),
+    [active, items],
   );
 
   // Per-filter counts — a quiet superscript that gives each chip a little weight.
   const counts = useMemo(() => {
     const map = new Map<string, number>();
-    map.set("All", galleryItems.length);
+    map.set("All", items.length);
     for (const c of CATEGORIES) {
-      map.set(c, galleryItems.filter((g) => g.categories.includes(c)).length);
+      map.set(c, items.filter((g) => g.categories.includes(c)).length);
     }
     return map;
-  }, []);
+  }, [items]);
 
   return (
     <>
