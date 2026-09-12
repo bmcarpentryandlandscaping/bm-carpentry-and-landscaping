@@ -13,7 +13,16 @@ const ROOT = fileURLToPath(new URL("..", import.meta.url));
 
 // pathToFileURL is required, not decorative: on Windows a bare absolute path
 // throws ERR_UNSUPPORTED_ESM_URL_SCHEME because Node reads "C:" as a scheme.
-const { DISCIPLINES, HERO, MOSAIC, PROJECTS, SERVICES_HERO, WORKSHOP } = await import(
+const {
+  DISCIPLINES,
+  HERO,
+  MOSAIC,
+  PROJECTS,
+  SERVICES_COPY,
+  SERVICES_HERO,
+  SITE_DETAILS,
+  WORKSHOP,
+} = await import(
   pathToFileURL(join(ROOT, "src/lib/defaults.ts")).href
 );
 
@@ -82,6 +91,8 @@ const content = [
   { key: "home.mosaic", data: MOSAIC },
   { key: "home.workshop", data: WORKSHOP },
   { key: "services.hero", data: SERVICES_HERO },
+  { key: "services.copy", data: SERVICES_COPY },
+  { key: "site.details", data: SITE_DETAILS },
 ];
 
 await upsert("content", content, "key");

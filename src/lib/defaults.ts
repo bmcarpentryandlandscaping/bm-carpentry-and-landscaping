@@ -5,7 +5,9 @@ import type {
   Hero,
   Mosaic,
   ProjectData,
+  ServicesCopy,
   ServicesHero,
+  SiteDetails,
   Workshop,
 } from "./schemas.ts";
 
@@ -128,6 +130,21 @@ export const SERVICES_HERO: ServicesHero = {
     alt: "BM Carpentry and Landscaping",
     caption: "Sydney",
   },
+};
+
+/** From src/app/(site)/services/page.tsx — the headings around the hero. */
+export const SERVICES_COPY: ServicesCopy = {
+  craft: "Our craft",
+  heading:
+    "Gardens, carpentry and landscaping that respond to the architecture and the land.",
+  intro:
+    "One Sydney team, designing and building outdoors from carpentry through to landscaping. Four disciplines, one crew: start to finish.",
+  disciplinesHeading: "Four disciplines.",
+};
+
+/** No licence number yet — the footer shows nothing until one is entered. */
+export const SITE_DETAILS: SiteDetails = {
+  licence: "",
 };
 
 export type ProjectRecord = {

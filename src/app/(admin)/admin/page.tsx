@@ -3,15 +3,21 @@ import { requireSession } from "@/lib/auth";
 import { AdminPage } from "@/components/admin/AdminPage";
 import { listProjects } from "./_actions/projects";
 import { listMedia } from "./_actions/media";
+import { loadContent } from "./_actions/content";
 
 /**
- * The dashboard's job is orientation, not decoration: four ways in, each
+ * The dashboard's job is orientation, not decoration: five ways in, each
  * carrying the one number that tells the client whether it needs attention.
- * Four identical cards with static blurbs told them nothing they could act on.
+ * Identical cards with static blurbs told them nothing they could act on.
  */
 export default async function AdminDashboard() {
   const { user } = await requireSession();
-  const [projects, media] = await Promise.all([listProjects(), listMedia()]);
+  const [projects, media, details] = await Promise.all([
+    listProjects(),
+    listMedia(),
+    loadContent("site.details"),
+  ]);
+  const licence = details.licence;
 
   const live = projects.ok ? projects.data.filter((p) => p.published).length : null;
   const hidden = projects.ok ? projects.data.length - (live ?? 0) : null;
@@ -27,8 +33,8 @@ export default async function AdminDashboard() {
     {
       href: "/admin/services",
       title: "Services",
-      body: "The two photos at the top of the services page.",
-      status: "2 photos",
+      body: "The two photos at the top of the services page, and the wording around them.",
+      status: "Photos + wording",
     },
     {
       href: "/admin/projects",
@@ -44,6 +50,12 @@ export default async function AdminDashboard() {
       title: "Media",
       body: "Every photo and video you can choose from. Upload new ones here.",
       status: photos === null ? "—" : `${photos} file${photos === 1 ? "" : "s"}`,
+    },
+    {
+      href: "/admin/settings",
+      title: "Site details",
+      body: "Your licence number, shown in the footer of every page once you add it.",
+      status: licence ? "Licence set" : "No licence yet",
     },
   ];
 

@@ -20,7 +20,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Stack
 
 - **Next.js 16.3.4** App Router on **React 19** with **Turbopack**. The floor is set by `@opennextjs/cloudflare`'s peer range, not by a feature this app uses.
-- **Supabase** (Postgres + Auth + Storage) is the datastore: a `content` table for the five singleton homepage/services slots, a `projects` table, a `media` table, and Storage for uploads. RLS-gated; the admin reads/writes through the user's own session, never a service key.
+- **Supabase** (Postgres + Auth + Storage) is the datastore: a `content` table for the seven singleton homepage/services/site slots, a `projects` table, a `media` table, and Storage for uploads. RLS-gated; the admin reads/writes through the user's own session, never a service key.
 - **`@opennextjs/cloudflare` + `wrangler`** deploy the app to Cloudflare Workers (KV-backed ISR cache, D1-backed tag cache). See Deploy below.
 - **Tailwind v4** via `@tailwindcss/postcss` — config in `src/app/globals.css` (`@theme inline`).
 - **Lenis** for inertial smooth scroll + **GSAP** (with `ScrollTrigger`) for scrub-tied/pinned scroll choreography, on the public site only. Lenis's RAF is delegated to `gsap.ticker` so ScrollTrigger stays in sync.
@@ -49,9 +49,9 @@ The App Router is split into two route groups with different shells:
 - **Dynamic journal articles**: `/journal/[slug]` via `generateStaticParams()` over `src/lib/journal.ts`. Journal is currently disabled — `/journal` and `/journal/[slug]` both call `notFound()` before their markup runs; the routes and data are left intact as a one-line revert.
 
 ### Data
-- `src/lib/brand.ts` — single source of truth for brand/contact strings.
-- `src/lib/schemas.ts` — the contract. Zod schemas for the five `content` singletons (`Hero`, `Disciplines`, `Mosaic`, `Workshop`, `ServicesHero`, collected in `CONTENT_SCHEMAS`), `ProjectData`, and `MediaRow`. Every admin form and every server action validates against these; `content.ts` does too, on the way out.
-- `src/lib/content.ts` — **the only module that reads content out of Supabase**, for the public site. Reads go through plain `fetch` to PostgREST (not `supabase-js`) so `next: { tags }` applies, which is what lets a server action purge a specific page with `updateTag()`. Every export falls back to `defaults.ts` on any failure — network error, non-2xx, missing row, or a row that fails its Zod schema — logging once rather than ever rendering a blank site. Exports `getHero`/`getDisciplines`/`getMosaic`/`getWorkshop`/`getServicesHero` (schema-backed singletons), `getProjects`/`getProject(slug)`, and `resolveMosaic` (pairs a mosaic tile with its project, falling back to a slug-derived title and a link to `/projects` if the project was unpublished — never dropping a tile, since the ten fixed tile sizes tile a gapless grid).
+- `src/lib/brand.ts` — single source of truth for brand/contact strings. The licence number is NOT here: it is client-editable (`site.details` → `getSiteDetails`), blank until they enter one, and the footer renders nothing for an empty string.
+- `src/lib/schemas.ts` — the contract. Zod schemas for the seven `content` singletons (`Hero`, `Disciplines`, `Mosaic`, `Workshop`, `ServicesHero`, `ServicesCopy`, `SiteDetails`, collected in `CONTENT_SCHEMAS`), `ProjectData`, and `MediaRow`. Every admin form and every server action validates against these; `content.ts` does too, on the way out.
+- `src/lib/content.ts` — **the only module that reads content out of Supabase**, for the public site. Reads go through plain `fetch` to PostgREST (not `supabase-js`) so `next: { tags }` applies, which is what lets a server action purge a specific page with `updateTag()`. Every export falls back to `defaults.ts` on any failure — network error, non-2xx, missing row, or a row that fails its Zod schema — logging once rather than ever rendering a blank site. Exports `getHero`/`getDisciplines`/`getMosaic`/`getWorkshop`/`getServicesHero`/`getServicesCopy`/`getSiteDetails` (schema-backed singletons), `getProjects`/`getProject(slug)`, and `resolveMosaic` (pairs a mosaic tile with its project, falling back to a slug-derived title and a link to `/projects` if the project was unpublished — never dropping a tile, since the ten fixed tile sizes tile a gapless grid).
 - `src/lib/defaults.ts` — the fallback `content.ts` reads on failure, transcribed from the code that predates the admin (hero, disciplines, mosaic, workshop, services hero, and `PROJECTS`, derived from `gallery.ts`'s `galleryItems` — never hand-transcribed). Not a second source of truth: once the client edits content, the database leads and these drift, which is expected — `npm run check` only requires they stay parseable and renderable.
 - `src/lib/gallery.ts` — still the source of the **generators**: `CATEGORIES`, `projectSlug`, `projectImages` (deterministic mixed-size gallery fallback when a project has no hand-picked gallery), `projectDescription`, `projectScope`, `projectYear`, `getMoreProjects`. `defaults.ts` derives its seed data from `galleryItems` here; the admin-authored `ProjectData` rows in Supabase are what actually render once the client has edited a project.
 - `src/lib/journal.ts` — journal/blog data (routes disabled, see above): `JournalPost`s with a typed `body` block list, `posts`, `getPost(slug)`, `getNextPost(slug)`, `headingId(text)`.
@@ -74,7 +74,8 @@ Route map, all under `(admin)/admin/`:
 | `/admin` | Dashboard — four cards linking to the sections below |
 | `/admin/login` | Email/password sign-in (Supabase Auth), no self-service reset |
 | `/admin/homepage` | Tabs: **Hero**, **What we do** (disciplines), **Featured** (mosaic), **Workshop** |
-| `/admin/services` | The two services-page hero images |
+| `/admin/services` | Tabs: **Photos** (the two hero images), **Wording** (the services-page headings and lede) |
+| `/admin/settings` | Site details — the licence number shown in the footer once set |
 | `/admin/projects` | List — add, reorder, publish/hide, delete |
 | `/admin/projects/[id]` | One project's editor (fields, cover/feature images, gallery) |
 | `/admin/media` | Library — upload, rename, set alt text, delete |

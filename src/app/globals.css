@@ -782,15 +782,6 @@
     transform: translateY(-1px);
   }
 
-  /* Loading screen logo is permanently orange, no hover color change */
-  .loader-curtain .brand-logo {
-    background-color: var(--accent) !important;
-  }
-  .loader-curtain:hover .brand-logo,
-  .loader-curtain .brand-logo:hover {
-    background-color: var(--accent) !important;
-  }
-
   /* Navbar logo: permanently orange, matches the footer mark */
   header .brand-logo {
     background-color: var(--accent);
@@ -810,8 +801,7 @@
     background-color: var(--accent) !important;
   }
 
-  /* Monogram reveal for the loader — wipes up through its own clip,
-     then the whole mark settles. */
+  /* Logo reveal for the loader — wipes up through its own clip. */
   .brand-logo-reveal {
     clip-path: inset(0 0 100% 0);
     animation: brand-logo-wipe 1s var(--ease-out-expo) 0.25s forwards;

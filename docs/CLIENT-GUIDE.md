@@ -17,14 +17,15 @@ also sit along the top of every page so you can jump between them.
 
 Sign out (bottom right) when you are on a shared or public computer.
 
-## The four sections
+## The five sections
 
 | Section | What you can change |
 | --- | --- |
 | **Homepage** | Four tabs — **Hero** (the big photo at the top), **What we do** (the four things you do), **Featured** (the ten featured project tiles), and **Workshop** (the five build stages) |
-| **Services** | The two photos on the services page. (The four discipline cards further down that page are the same ones you edit under Homepage → What we do — changing one changes both places.) |
+| **Services** | Two tabs — **Photos** (the two photos at the top) and **Wording** (the big “Our craft” words, the headline and paragraph beside the second photo, and the “Four disciplines.” heading). (The four discipline cards further down that page are the same ones you edit under Homepage → What we do — changing one changes both places.) |
 | **Projects** | Add, edit, hide, reorder and delete projects |
 | **Media** | Upload photos and video, name them, write their descriptions |
+| **Site details** | Your licence number. Leave it empty and nothing shows; once you enter it, it appears in the footer of every page as “Licence No. …” |
 
 ## Saving your changes
 

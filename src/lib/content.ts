@@ -6,7 +6,9 @@ import {
   HERO,
   MOSAIC,
   PROJECTS,
+  SERVICES_COPY,
   SERVICES_HERO,
+  SITE_DETAILS,
   WORKSHOP,
   type ProjectRecord,
 } from "./defaults.ts";
@@ -16,7 +18,9 @@ import {
   Mosaic,
   type Mosaic as MosaicType,
   ProjectData,
+  ServicesCopy,
   ServicesHero,
+  SiteDetails,
   Workshop,
 } from "./schemas.ts";
 
@@ -96,6 +100,8 @@ export const getDisciplines = singleton("disciplines", Disciplines, DISCIPLINES)
 export const getMosaic = singleton("home.mosaic", Mosaic, MOSAIC);
 export const getWorkshop = singleton("home.workshop", Workshop, WORKSHOP);
 export const getServicesHero = singleton("services.hero", ServicesHero, SERVICES_HERO);
+export const getServicesCopy = singleton("services.copy", ServicesCopy, SERVICES_COPY);
+export const getSiteDetails = singleton("site.details", SiteDetails, SITE_DETAILS);
 
 /**
  * ProjectData -> GalleryItem, the shape every existing component and every

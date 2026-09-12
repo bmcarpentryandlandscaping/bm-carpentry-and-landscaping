@@ -5,7 +5,7 @@ import { MagneticLink } from "@/components/MagneticLink";
 import { ParallaxImage } from "@/components/ParallaxImage";
 import { Reveal } from "@/components/Reveal";
 import { SplitText } from "@/components/SplitText";
-import { getDisciplines, getServicesHero } from "@/lib/content";
+import { getDisciplines, getServicesCopy, getServicesHero } from "@/lib/content";
 
 export const metadata: Metadata = {
   title: "Services",
@@ -41,7 +41,16 @@ const process = [
 ];
 
 export default async function ServicesPage() {
-  const [disciplines, servicesHero] = await Promise.all([getDisciplines(), getServicesHero()]);
+  const [disciplines, servicesHero, copy] = await Promise.all([
+    getDisciplines(),
+    getServicesHero(),
+    getServicesCopy(),
+  ]);
+  // One word per line, so "Our craft" still stacks the way it was hardcoded.
+  // A flat array (not fragments) keeps SplitText splitting each word into chars.
+  const craftLines = copy.craft
+    .split(/\s+/)
+    .flatMap((word, i) => (i === 0 ? [word] : [<br key={`br${i}`} />, word]));
   return (
     <>
       {/* HERO — two staggered images flanking a stacked header/subhead */}
@@ -67,9 +76,7 @@ export default async function ServicesPage() {
               as="p"
               className="text-center font-display leading-[0.95] tracking-[-0.03em] text-[clamp(2.5rem,6vw,5.5rem)]"
             >
-              Our
-              <br />
-              craft
+              {craftLines}
             </SplitText>
           </div>
 
@@ -89,11 +96,10 @@ export default async function ServicesPage() {
             </div>
             <Reveal delay={180} className="md:mt-8">
               <h1 className="font-display text-[clamp(1.6rem,4vw,2rem)] leading-[1.15] md:text-[1.9rem]">
-                Gardens, carpentry and landscaping that respond to the architecture and the land.
+                {copy.heading}
               </h1>
               <p className="mt-4 max-w-md text-base leading-relaxed text-muted-foreground">
-                One Sydney team, designing and building outdoors from carpentry through
-                to landscaping. Four disciplines, one crew: start to finish.
+                {copy.intro}
               </p>
               <MagneticLink
                 href="/projects"
@@ -108,12 +114,9 @@ export default async function ServicesPage() {
 
       {/* SERVICES — sticky stack of panels */}
       <section className="mx-auto max-w-[1600px] px-6 pt-12 md:px-12">
-        <div className="flex flex-wrap items-end justify-between gap-x-10 gap-y-3">
-          <SplitText as="h2" className="font-display text-3xl leading-tight md:text-6xl">
-            Four disciplines.
-          </SplitText>
-          <p className="eyebrow text-muted-foreground">Designed &amp; built in-house</p>
-        </div>
+        <SplitText as="h2" className="font-display text-3xl leading-tight md:text-6xl">
+          {copy.disciplinesHeading}
+        </SplitText>
       </section>
       {disciplines.items.map((s, i) => (
         <DisciplineCard

@@ -93,6 +93,31 @@ export const ServicesHero = z.object({
 export type ServicesHero = z.infer<typeof ServicesHero>;
 
 /**
+ * The headings and lede on /services. Separate row from `services.hero` on
+ * purpose: adding fields to a schema whose row is already stored would make
+ * that row fail its parse and silently fall back to defaults.ts until the
+ * client saved again — i.e. their live hero photos would vanish on deploy.
+ */
+export const ServicesCopy = z.object({
+  /** Words stack one per line in the middle column: "Our craft" = two lines. */
+  craft: z.string().min(1).max(24),
+  heading: z.string().min(1).max(160),
+  intro: z.string().min(1).max(400),
+  disciplinesHeading: z.string().min(1).max(40), // "Four disciplines."
+});
+export type ServicesCopy = z.infer<typeof ServicesCopy>;
+
+/**
+ * Site-wide details that live in the footer. `licence` is blank until the
+ * client has one — the footer renders nothing at all for an empty string, so
+ * there is no half-filled "Licence No." sitting on the live site.
+ */
+export const SiteDetails = z.object({
+  licence: z.string().max(40),
+});
+export type SiteDetails = z.infer<typeof SiteDetails>;
+
+/**
  * A project. summary / feature / gallery stay optional on purpose, but absent
  * now means absent: an empty gallery hides the Selected views section outright
  * and no feature photo leaves that column empty. Only `summary` still generates
@@ -138,7 +163,7 @@ export const MediaRow = z.object({
 export type MediaRow = z.infer<typeof MediaRow>;
 
 /**
- * Key -> schema for the `content` table's five singleton rows. The seed script,
+ * Key -> schema for the `content` table's singleton rows. The seed script,
  * the read layer and the admin save action all drive off this map, so adding a
  * section means adding one entry here and nothing else structural.
  */
@@ -148,6 +173,8 @@ export const CONTENT_SCHEMAS = {
   "home.mosaic": Mosaic,
   "home.workshop": Workshop,
   "services.hero": ServicesHero,
+  "services.copy": ServicesCopy,
+  "site.details": SiteDetails,
 } as const;
 
 export type ContentKey = keyof typeof CONTENT_SCHEMAS;

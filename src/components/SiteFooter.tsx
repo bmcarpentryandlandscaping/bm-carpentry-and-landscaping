@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { brand } from "@/lib/brand";
+import { getSiteDetails } from "@/lib/content";
 
 const navLinks = [
   { href: "/services", label: "Services" },
@@ -37,8 +38,9 @@ function SocialIcon({ label }: { label: string }) {
   return null;
 }
 
-export function SiteFooter() {
+export async function SiteFooter() {
   const year = new Date().getFullYear();
+  const { licence } = await getSiteDetails();
 
   return (
     <footer className="surface-deep relative overflow-hidden border-t border-current/12">
@@ -58,12 +60,8 @@ export function SiteFooter() {
               alt={brand.fullName}
               width={1500}
               height={482}
-              className="h-14 w-auto"
+              className="h-20 w-auto md:h-24"
             />
-            <p className="eyebrow mt-7 flex items-center gap-2.5 opacity-60">
-              <span className="pulse-dot" aria-hidden />
-              Available for new commissions
-            </p>
           </div>
 
           {/* index */}
@@ -127,9 +125,13 @@ export function SiteFooter() {
           <span>
             © {year} {brand.fullName}
           </span>
-          <Link href="/privacy" className="transition-opacity hover:opacity-100">
-            Privacy
-          </Link>
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+            {/* Blank until the client enters one in Admin → Site details. */}
+            {licence && <span>Licence No. {licence}</span>}
+            <Link href="/privacy" className="transition-opacity hover:opacity-100">
+              Privacy
+            </Link>
+          </div>
         </div>
       </div>
     </footer>

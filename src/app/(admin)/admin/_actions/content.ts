@@ -4,7 +4,15 @@ import { updateTag } from "next/cache";
 import { requireSession } from "@/lib/auth";
 import type { ActionResult } from "@/lib/actions";
 import { CONTENT_SCHEMAS, type ContentKey } from "@/lib/schemas";
-import { DISCIPLINES, HERO, MOSAIC, SERVICES_HERO, WORKSHOP } from "@/lib/defaults";
+import {
+  DISCIPLINES,
+  HERO,
+  MOSAIC,
+  SERVICES_COPY,
+  SERVICES_HERO,
+  SITE_DETAILS,
+  WORKSHOP,
+} from "@/lib/defaults";
 
 const FALLBACK: Record<ContentKey, unknown> = {
   "home.hero": HERO,
@@ -12,6 +20,8 @@ const FALLBACK: Record<ContentKey, unknown> = {
   "home.mosaic": MOSAIC,
   "home.workshop": WORKSHOP,
   "services.hero": SERVICES_HERO,
+  "services.copy": SERVICES_COPY,
+  "site.details": SITE_DETAILS,
 };
 
 /**

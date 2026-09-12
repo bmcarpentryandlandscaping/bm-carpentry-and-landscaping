@@ -23,6 +23,8 @@ for (const [name, schema, value] of [
   ["MOSAIC", s.Mosaic, d.MOSAIC],
   ["WORKSHOP", s.Workshop, d.WORKSHOP],
   ["SERVICES_HERO", s.ServicesHero, d.SERVICES_HERO],
+  ["SERVICES_COPY", s.ServicesCopy, d.SERVICES_COPY],
+  ["SITE_DETAILS", s.SiteDetails, d.SITE_DETAILS],
 ]) {
   const r = schema.safeParse(value);
   if (!r.success) errors.push(`${name} does not parse: ${JSON.stringify(r.error.issues)}`);

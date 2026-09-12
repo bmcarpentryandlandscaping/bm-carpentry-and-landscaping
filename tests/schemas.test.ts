@@ -8,6 +8,7 @@ import {
   ServicesHero,
   ProjectData,
   CONTENT_SCHEMAS,
+  SiteDetails,
 } from "../src/lib/schemas.ts";
 import {
   projectDescription,
@@ -150,12 +151,18 @@ test("optional project fields stay optional — absent now means absent, nothing
   );
 });
 
-test("CONTENT_SCHEMAS covers exactly the five singleton keys", () => {
+test("CONTENT_SCHEMAS covers exactly the singleton keys", () => {
   assert.deepEqual(Object.keys(CONTENT_SCHEMAS).sort(), [
     "disciplines",
     "home.hero",
     "home.mosaic",
     "home.workshop",
+    "services.copy",
     "services.hero",
+    "site.details",
   ]);
+});
+
+test("an empty licence still parses — the footer hides it", () => {
+  assert.ok(SiteDetails.safeParse({ licence: "" }).success);
 });

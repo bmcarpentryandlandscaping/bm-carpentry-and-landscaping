@@ -19,15 +19,15 @@ export function Loader() {
       className="loader-curtain fixed inset-0 z-[100] flex flex-col items-center justify-center"
       style={{ background: "var(--surface-deep)", color: "var(--surface-deep-foreground)" }}
     >
-      <span
-        className="brand-logo brand-logo-reveal"
-        role="img"
-        aria-label={brand.fullName}
-        style={{ width: 96, height: 96, transition: "none" }}
+      {/* The full lockup, not the masked monogram: it already carries the
+          wordmark, so the tagline line underneath it was saying it twice. */}
+      <img
+        src="/logos/BMCL_LOGO_WHITE_ORANGE.png"
+        alt={brand.fullName}
+        width={1500}
+        height={895}
+        className="brand-logo-reveal h-auto w-[min(62vw,320px)]"
       />
-      <span className="eyebrow loader-mask mt-7 opacity-70" style={{ display: "block" }}>
-        <span>{brand.tagline}</span>
-      </span>
     </div>
   );
 }
