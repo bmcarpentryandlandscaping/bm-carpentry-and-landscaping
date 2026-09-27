@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "bm-carpentry",
+  "name": "bm-carpentry-and-landscaping",
   "main": ".open-next/worker.js",
   "compatibility_date": "2026-09-26",
   "compatibility_flags": ["nodejs_compat"],
@@ -11,14 +11,14 @@
   "observability": { "enabled": true },
   "kv_namespaces": [
     // Incremental (ISR) cache AND the login throttle of spec §6.3.
-    { "binding": "NEXT_INC_CACHE_KV", "id": "REPLACE_IN_TASK_2" }
+    { "binding": "NEXT_INC_CACHE_KV", "id": "d46183aebc194c1c9e29ee2bbfc8def8" }
   ],
   "d1_databases": [
     // Tag cache — what makes updateTag() purge the public page.
     {
       "binding": "NEXT_TAG_CACHE_D1",
       "database_name": "bm-carpentry-tags",
-      "database_id": "REPLACE_IN_TASK_2"
+      "database_id": "8d86219a-12e2-494d-870f-bc2d42e93af7"
     }
   ]
 }
