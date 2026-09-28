@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { brand } from "@/lib/brand";
+import { renderEnquiryEmail } from "@/lib/enquiry-email";
 import { enquiryRate } from "@/lib/ratelimit";
 import { Enquiry } from "@/lib/schemas";
 
@@ -135,22 +136,9 @@ export async function POST(request: NextRequest) {
     return json({ ok: false, message: FAILURE_NOTE }, 500);
   }
 
-  const name = [enquiry.firstName, enquiry.lastName].filter(Boolean).join(" ");
-
-  // Plain text only, no HTML body. Every value here is attacker-controlled, and
-  // text has no markup to escape into — there is no injection to get wrong.
-  const lines = [
-    `Name:     ${name}`,
-    `Email:    ${enquiry.email}`,
-    enquiry.phone && `Phone:    ${enquiry.phone}`,
-    enquiry.projectType && `Project:  ${enquiry.projectType}`,
-    enquiry.address && `Address:  ${enquiry.address}`,
-    enquiry.heard && `Heard by: ${enquiry.heard}`,
-    "",
-    enquiry.message || "(no message)",
-    "",
-    "— Sent from the bmcl.au contact form",
-  ].filter(Boolean);
+  // Both parts are sent: the HTML template, and the plain-text fallback for
+  // clients with HTML off. Escaping of the visitor's input happens in there.
+  const { subject, text, html } = renderEnquiryEmail(enquiry);
 
   try {
     const res = await fetch(RESEND_URL, {
@@ -164,8 +152,9 @@ export async function POST(request: NextRequest) {
         to: [brand.email],
         // Hitting Reply in the inbox answers the customer, not our own sender.
         reply_to: enquiry.email,
-        subject: `New enquiry — ${name}${enquiry.projectType ? ` · ${enquiry.projectType}` : ""}`,
-        text: lines.join("\n"),
+        subject,
+        html,
+        text,
       }),
     });
 
