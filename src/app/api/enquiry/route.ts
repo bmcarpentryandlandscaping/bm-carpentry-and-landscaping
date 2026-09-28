@@ -1,12 +1,19 @@
-"use server";
-
-import { headers } from "next/headers";
+import { NextResponse, type NextRequest } from "next/server";
 import { brand } from "@/lib/brand";
 import { enquiryRate } from "@/lib/ratelimit";
 import { Enquiry } from "@/lib/schemas";
 
 /**
- * Sends a contact-form enquiry to the inbox in `brand.email`.
+ * Contact-form enquiries — a plain POST endpoint, deliberately NOT a Server
+ * Action.
+ *
+ * The first version was an action, and it returned 500 on every submission in
+ * production. `/contact` is prerendered (`x-nextjs-cache: HIT`,
+ * `x-nextjs-prerender: 1` came back on the POST itself), and resolving a
+ * `next-action` id against a cached prerender of that route failed before any of
+ * our code ran — which is why an empty form and a filled one failed the same
+ * way. A route handler has no action id to resolve and no cache entry to collide
+ * with: it is an ordinary POST the Worker always executes.
  *
  * Delivery is Resend's REST API over plain `fetch` rather than their SDK — the
  * same choice `content.ts` makes for PostgREST. One HTTPS call needs no client
@@ -17,6 +24,9 @@ import { Enquiry } from "@/lib/schemas";
  * the phone numbers and mailto: link sitting directly beside the form, rather
  * than being told it worked while it sits unread in a table nobody opens.
  */
+
+/** This route sends mail; it must never be answered from a cache. */
+export const dynamic = "force-dynamic";
 
 /** Resend's send endpoint. */
 const RESEND_URL = "https://api.resend.com/emails";
@@ -40,17 +50,16 @@ const FAILURE_NOTE =
   `Sorry — we couldn't send that. Please email ${brand.email} ` +
   `or call us directly and we'll pick it up straight away.`;
 
-export type EnquiryState = {
-  status: "idle" | "sent" | "error";
+/** The JSON the form reads back. Mirrors what the old action returned. */
+export type EnquiryResponse = {
+  ok: boolean;
   /** Form-level message. Shown as-is, so it must stay free of internal detail. */
   message?: string;
   /** Keyed by the form control's `name`, so the field can render its own error. */
   fieldErrors?: Record<string, string>;
 };
 
-export const INITIAL_ENQUIRY_STATE: EnquiryState = { status: "idle" };
-
-/** FormData control names -> schema keys. The markup's ids are kebab-case. */
+/** Posted JSON keys -> schema keys. The markup's ids are kebab-case. */
 const FIELDS = {
   firstName: "first-name",
   lastName: "last-name",
@@ -62,22 +71,26 @@ const FIELDS = {
   message: "message",
 } as const;
 
-export async function sendEnquiry(
-  _prev: EnquiryState,
-  formData: FormData,
-): Promise<EnquiryState> {
+export async function POST(request: NextRequest) {
+  let body: Record<string, unknown>;
+  try {
+    body = (await request.json()) as Record<string, unknown>;
+  } catch {
+    return json({ ok: false, message: FAILURE_NOTE }, 400);
+  }
+
   // Honeypot. A field hidden from people but not from the bots that fill in
   // every input they find. Answer exactly as a success would look: telling a
   // bot which signal caught it is how it learns to avoid the signal.
-  if (String(formData.get("company") ?? "").trim() !== "") {
-    return { status: "sent" };
+  if (String(body.company ?? "").trim() !== "") {
+    return json({ ok: true }, 200);
   }
 
   const parsed = Enquiry.safeParse(
     Object.fromEntries(
       Object.entries(FIELDS).map(([schemaKey, control]) => [
         schemaKey,
-        String(formData.get(control) ?? ""),
+        String(body[control] ?? ""),
       ]),
     ),
   );
@@ -90,35 +103,36 @@ export async function sendEnquiry(
       // First issue per field wins — a field shows one message, not a stack.
       if (control && !fieldErrors[control]) fieldErrors[control] = issue.message;
     }
-    return {
-      status: "error",
-      message: "Please check the highlighted fields.",
-      fieldErrors,
-    };
+    return json(
+      { ok: false, message: "Please check the highlighted fields.", fieldErrors },
+      400,
+    );
   }
 
   const enquiry = parsed.data;
 
   // Per-IP throttle over the KV namespace. Fails open: a cache outage must not
   // stop a real customer getting in touch.
-  const head = await headers();
   const ip =
-    head.get("cf-connecting-ip") ??
-    head.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    request.headers.get("cf-connecting-ip") ??
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
     "unknown";
 
   const rate = await enquiryRate(ip);
   if (!rate.allowed) {
-    return {
-      status: "error",
-      message: `You've sent a few already — please give it a little while, or call us on ${brand.phones[0]?.number}.`,
-    };
+    return json(
+      {
+        ok: false,
+        message: `You've sent a few already — please give it a little while, or call us on ${brand.phones[0]?.number}.`,
+      },
+      429,
+    );
   }
 
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
     console.error("[enquiry] RESEND_API_KEY is not set — enquiry not sent");
-    return { status: "error", message: FAILURE_NOTE };
+    return json({ ok: false, message: FAILURE_NOTE }, 500);
   }
 
   const name = [enquiry.firstName, enquiry.lastName].filter(Boolean).join(" ");
@@ -158,12 +172,16 @@ export async function sendEnquiry(
     if (!res.ok) {
       // Log the provider's reason for us; show the visitor the fallback only.
       console.error(`[enquiry] Resend responded ${res.status}: ${await res.text()}`);
-      return { status: "error", message: FAILURE_NOTE };
+      return json({ ok: false, message: FAILURE_NOTE }, 502);
     }
   } catch (err) {
     console.error("[enquiry] send failed:", err);
-    return { status: "error", message: FAILURE_NOTE };
+    return json({ ok: false, message: FAILURE_NOTE }, 502);
   }
 
-  return { status: "sent" };
+  return json({ ok: true }, 200);
+}
+
+function json(payload: EnquiryResponse, status: number) {
+  return NextResponse.json(payload, { status });
 }
