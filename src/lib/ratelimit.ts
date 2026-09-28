@@ -19,6 +19,17 @@
 export const LIMIT = 8;
 export const WINDOW_MS = 15 * 60 * 1000;
 
+/**
+ * The public enquiry form gets its own, much stricter budget.
+ *
+ * A real enquirer sends one message; the ceiling only has to sit above an
+ * honest double-submit. It is deliberately far below the login budget because
+ * every send here costs an email from a metered quota, so an unthrottled form
+ * is a way to burn that quota rather than just a way to guess a password.
+ */
+export const ENQUIRY_LIMIT = 5;
+export const ENQUIRY_WINDOW_MS = 60 * 60 * 1000;
+
 export type RateStore = {
   get(key: string): Promise<string | null>;
   put(key: string, value: string, opts?: { expirationTtl?: number }): Promise<unknown>;
@@ -30,27 +41,47 @@ export type RateResult = { allowed: boolean; retryAfterMs: number };
 const key = (ip: string) => `login:${ip}`;
 
 /** Records the attempt and reports whether it may proceed. */
-export async function checkLoginRate(
+export function checkLoginRate(
   store: RateStore,
   ip: string,
   now: number = Date.now(),
 ): Promise<RateResult> {
+  return checkRate(store, key(ip), LIMIT, WINDOW_MS, now);
+}
+
+/** Same rolling window, keyed and budgeted for the public enquiry form. */
+export function checkEnquiryRate(
+  store: RateStore,
+  ip: string,
+  now: number = Date.now(),
+): Promise<RateResult> {
+  return checkRate(store, `enquiry:${ip}`, ENQUIRY_LIMIT, ENQUIRY_WINDOW_MS, now);
+}
+
+/** The rolling window itself. Same fail-open contract as the callers above. */
+async function checkRate(
+  store: RateStore,
+  storeKey: string,
+  limit: number,
+  windowMs: number,
+  now: number,
+): Promise<RateResult> {
   try {
-    const raw = await store.get(key(ip));
+    const raw = await store.get(storeKey);
     // Guard the shape, not just the parse: a malformed value would otherwise land in
     // the catch below and fail open for the whole TTL, silently disabling the throttle.
     const parsed: unknown = raw ? JSON.parse(raw) : [];
     const stamps: number[] = Array.isArray(parsed) ? parsed.filter((t) => typeof t === "number") : [];
-    const recent = stamps.filter((t) => now - t < WINDOW_MS);
+    const recent = stamps.filter((t) => now - t < windowMs);
 
-    if (recent.length >= LIMIT) {
+    if (recent.length >= limit) {
       const oldest = Math.min(...recent);
-      return { allowed: false, retryAfterMs: WINDOW_MS - (now - oldest) };
+      return { allowed: false, retryAfterMs: windowMs - (now - oldest) };
     }
 
     recent.push(now);
-    await store.put(key(ip), JSON.stringify(recent), {
-      expirationTtl: Math.ceil(WINDOW_MS / 1000),
+    await store.put(storeKey, JSON.stringify(recent), {
+      expirationTtl: Math.ceil(windowMs / 1000),
     });
     return { allowed: true, retryAfterMs: 0 };
   } catch (err) {
@@ -77,6 +108,13 @@ export async function loginRate(ip: string): Promise<RateResult> {
   const store = await kv();
   if (!store) return { allowed: true, retryAfterMs: 0 };
   return checkLoginRate(store, ip);
+}
+
+/** Enquiry-form counterpart of loginRate. Fails open for the same reason. */
+export async function enquiryRate(ip: string): Promise<RateResult> {
+  const store = await kv();
+  if (!store) return { allowed: true, retryAfterMs: 0 };
+  return checkEnquiryRate(store, ip);
 }
 
 export async function loginRateClear(ip: string): Promise<void> {

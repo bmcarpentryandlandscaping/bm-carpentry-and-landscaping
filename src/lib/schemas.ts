@@ -163,6 +163,32 @@ export const MediaRow = z.object({
 export type MediaRow = z.infer<typeof MediaRow>;
 
 /**
+ * The public contact form.
+ *
+ * Every other schema in this file guards a layout: a string two words too long
+ * wraps a heading that was designed for one line. This one guards an inbox
+ * instead. It is the only schema filled in by strangers rather than by the
+ * client, so the caps bound what an anonymous POST can push into an email we
+ * send to ourselves — a server action is a public endpoint, and nothing stops
+ * someone posting to it without ever loading the form.
+ *
+ * No `.default()` and no `.optional()`: FormData always yields a string, so an
+ * untouched field arrives as "" and parses cleanly. Only the two fields needed
+ * to reply to the sender carry a `.min(1)`.
+ */
+export const Enquiry = z.object({
+  firstName: z.string().trim().min(1, "Please tell us your name").max(80),
+  lastName: z.string().trim().max(80),
+  email: z.string().trim().email("That email address looks incomplete").max(160),
+  phone: z.string().trim().max(40),
+  projectType: z.string().trim().max(40),
+  address: z.string().trim().max(200),
+  heard: z.string().trim().max(120),
+  message: z.string().trim().max(4000),
+});
+export type Enquiry = z.infer<typeof Enquiry>;
+
+/**
  * Key -> schema for the `content` table's singleton rows. The seed script,
  * the read layer and the admin save action all drive off this map, so adding a
  * section means adding one entry here and nothing else structural.

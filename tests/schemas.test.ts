@@ -9,6 +9,7 @@ import {
   ProjectData,
   CONTENT_SCHEMAS,
   SiteDetails,
+  Enquiry,
 } from "../src/lib/schemas.ts";
 import {
   projectDescription,
@@ -165,4 +166,35 @@ test("CONTENT_SCHEMAS covers exactly the singleton keys", () => {
 
 test("an empty licence still parses — the footer hides it", () => {
   assert.ok(SiteDetails.safeParse({ licence: "" }).success);
+});
+
+test("Enquiry needs a name and a usable reply address, nothing else", () => {
+  const minimum = {
+    firstName: "Sam",
+    lastName: "",
+    email: "sam@example.com",
+    phone: "",
+    projectType: "",
+    address: "",
+    heard: "",
+    message: "",
+  };
+  assert.ok(Enquiry.safeParse(minimum).success);
+  assert.ok(!Enquiry.safeParse({ ...minimum, firstName: "  " }).success);
+  assert.ok(!Enquiry.safeParse({ ...minimum, email: "sam@" }).success);
+});
+
+test("Enquiry caps the message so a stranger cannot post a novel to the inbox", () => {
+  const base = {
+    firstName: "Sam",
+    lastName: "",
+    email: "sam@example.com",
+    phone: "",
+    projectType: "",
+    address: "",
+    heard: "",
+    message: "x".repeat(4000),
+  };
+  assert.ok(Enquiry.safeParse(base).success);
+  assert.ok(!Enquiry.safeParse({ ...base, message: "x".repeat(4001) }).success);
 });

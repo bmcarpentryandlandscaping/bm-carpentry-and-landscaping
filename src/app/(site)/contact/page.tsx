@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { BrandMark } from "@/components/BrandMark";
-import { HoverFillButton } from "@/components/HoverFillButton";
 import { Reveal } from "@/components/Reveal";
 import { RevealImage } from "@/components/RevealImage";
 import { brand } from "@/lib/brand";
+import { ContactForm } from "./ContactForm";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -25,9 +25,6 @@ const ROW = [
   { src: "/images/campsie-2.webp", alt: "Landscaped courtyard, Campsie" },
   { src: "/images/earlwood-3.webp", alt: "Established planting against fresh hardwood, Earlwood" },
 ];
-
-/* ── Form option group ────────────────────────────────────────── */
-const PROJECT_TYPES = ["Landscape", "Carpentry", "Pool", "Stonework"];
 
 /* ── Social icons for the contact card ────────────────────────── */
 function SocialIcon({ label }: { label: string }) {
@@ -142,49 +139,7 @@ export default function ContactPage() {
 
           {/* enquiry form */}
           <Reveal delay={140}>
-            <form className="contact-stagger grid grid-cols-1 gap-x-8 gap-y-7 sm:grid-cols-2">
-              <Field id="first-name" label="First Name" autoComplete="given-name" index={0} />
-              <Field id="last-name" label="Last Name" autoComplete="family-name" index={1} />
-              <Field id="email" label="Email" type="email" autoComplete="email" index={2} />
-              <Field id="phone" label="Phone" type="tel" autoComplete="tel" index={3} />
-
-              <SelectField
-                id="project-type"
-                label="Select an option"
-                options={PROJECT_TYPES}
-                index={4}
-              />
-
-              <Field
-                id="address"
-                label="Address"
-                autoComplete="street-address"
-                index={5}
-                span
-              />
-              <Field id="heard" label="How did you hear about us?" index={6} span />
-
-              <div className="field-line relative sm:col-span-2" style={{ ["--i" as string]: 7 }}>
-                <label htmlFor="message" className="eyebrow text-muted-foreground">
-                  Want to tell us more about the project?
-                </label>
-                <textarea
-                  id="message"
-                  name="message"
-                  rows={3}
-                  className="peer mt-3 w-full resize-none border-b border-border bg-transparent pb-2 text-base leading-[1.5] tracking-[-0.005em] outline-none md:text-[0.95rem]"
-                />
-              </div>
-
-              <div className="pt-2 sm:col-span-2" style={{ ["--i" as string]: 8 }}>
-                <HoverFillButton
-                  type="button"
-                  className="rounded-full border border-foreground px-8 py-3.5 text-[0.78rem] uppercase tracking-[0.06em] transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] active:scale-[0.97]"
-                >
-                  Send Enquiry <span aria-hidden>→</span>
-                </HoverFillButton>
-              </div>
-            </form>
+            <ContactForm />
           </Reveal>
         </div>
       </div>
@@ -227,89 +182,6 @@ function InfoRow({ label, children }: { label: string; children: React.ReactNode
       <p className="eyebrow text-muted-foreground/80">{label}</p>
       <div className="mt-2.5 font-display text-[1.35rem] leading-snug tracking-[-0.01em] sm:text-[1.55rem]">
         {children}
-      </div>
-    </div>
-  );
-}
-
-/* ── Underlined floating-label field ──────────────────────────── */
-function Field({
-  id,
-  label,
-  type = "text",
-  autoComplete,
-  index = 0,
-  span = false,
-}: {
-  id: string;
-  label: string;
-  type?: string;
-  autoComplete?: string;
-  index?: number;
-  span?: boolean;
-}) {
-  return (
-    <div
-      className={`field-line relative ${span ? "sm:col-span-2" : ""}`}
-      style={{ ["--i" as string]: index }}
-    >
-      <label htmlFor={id} className="eyebrow text-muted-foreground">
-        {label}
-      </label>
-      <input
-        id={id}
-        name={id}
-        type={type}
-        autoComplete={autoComplete}
-        className="peer mt-3 w-full border-b border-border bg-transparent pb-2 text-base tracking-[-0.005em] outline-none md:text-[0.95rem]"
-      />
-    </div>
-  );
-}
-
-/* ── Underlined select with custom chevron ─────────────────────── */
-function SelectField({
-  id,
-  label,
-  options,
-  index = 0,
-}: {
-  id: string;
-  label: string;
-  options: string[];
-  index?: number;
-}) {
-  return (
-    <div
-      className="field-line relative sm:col-span-2"
-      style={{ ["--i" as string]: index }}
-    >
-      <label htmlFor={id} className="eyebrow text-muted-foreground">
-        {label}
-      </label>
-      <div className="relative mt-3">
-        <select
-          id={id}
-          name={id}
-          defaultValue=""
-          className="peer w-full appearance-none border-b border-border bg-transparent pb-2 pr-7 text-base tracking-[-0.005em] outline-none md:text-[0.95rem]"
-        >
-          <option value="" disabled>
-            Select an option
-          </option>
-          {options.map((o) => (
-            <option key={o} value={o}>
-              {o}
-            </option>
-          ))}
-        </select>
-        <svg
-          aria-hidden
-          viewBox="0 0 12 8"
-          className="pointer-events-none absolute right-0 top-1/2 h-2 w-3 -translate-y-1/2 text-muted-foreground"
-        >
-          <path d="M1 1.5L6 6.5L11 1.5" fill="none" stroke="currentColor" strokeWidth="1.4" />
-        </svg>
       </div>
     </div>
   );

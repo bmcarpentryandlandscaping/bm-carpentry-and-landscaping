@@ -32,6 +32,16 @@ const valueItems: ValueItem[] = [
   },
 ];
 
+// Hand-set line breaks, measured for the desktop size; joined into one
+// flowing paragraph on phones — see the founder quote section below.
+const founderQuote = [
+  "“The best compliment we get",
+  "isn't the day we hand over.",
+  "It's five years later, when a",
+  "garden looks like it grew there",
+  "on its own.”",
+];
+
 // ponytail: markers are experience spans, not founding years — swap for real
 // dates (and add the years the two trades actually started) once confirmed.
 const timeline = [
@@ -254,16 +264,19 @@ export default function AboutPage() {
           <div className="grid gap-x-12 gap-y-6 md:grid-cols-12">
             <p className="eyebrow opacity-70 md:col-span-3 md:pt-2">In Michael&rsquo;s words</p>
             <blockquote className="md:col-span-9">
+              {/* Phones let the sentence wrap on its own. founderQuote's breaks are
+                  measured for the 3.4rem desktop size; at phone width each one
+                  over-ran and wrapped *inside* its own mask clip, which left the
+                  block ragged and unevenly spaced. */}
               <MaskHeading
                 as="p"
-                lines={[
-                  "“The best compliment we get",
-                  "isn't the day we hand over.",
-                  "It's five years later, when a",
-                  "garden looks like it grew there",
-                  "on its own.”",
-                ]}
-                className="font-display text-[1.9rem] leading-[1.08] tracking-[-0.02em] md:text-[3.4rem]"
+                lines={[founderQuote.join(" ")]}
+                className="text-pretty font-display text-[1.9rem] leading-[1.14] tracking-[-0.02em] md:hidden"
+              />
+              <MaskHeading
+                as="p"
+                lines={founderQuote}
+                className="hidden font-display text-[3.4rem] leading-[1.08] tracking-[-0.02em] md:block"
                 stagger={90}
               />
               <footer className="eyebrow mt-7 opacity-70">Michael, Co-Founder</footer>

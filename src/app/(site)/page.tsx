@@ -76,7 +76,7 @@ export default async function HomePage() {
               <span style={{ animationDelay: "1.9s" }}>Dream.</span>{" "}
               <span style={{ animationDelay: "2.15s" }}>Design.</span>
               <br />
-              <span style={{ animationDelay: "2.4s" }} className="pl-[14%] md:pl-[24%]">Deliver.</span>
+              <span style={{ animationDelay: "2.4s" }} className="md:pl-[24%]">Deliver.</span>
             </h1>
             <div className="mt-10 grid items-end gap-8 md:grid-cols-12">
               <p className="max-w-md text-base leading-relaxed opacity-90 md:col-span-5 md:col-start-7">

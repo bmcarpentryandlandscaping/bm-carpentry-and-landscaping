@@ -42,7 +42,12 @@ async function toWebp(file: File): Promise<{ blob: Blob; width?: number; height?
         ? new OffscreenCanvas(width, height)
         : Object.assign(document.createElement("canvas"), { width, height });
 
-    const ctx = canvas.getContext("2d");
+    // `canvas` is a union, so TS resolves getContext's overload to the widest
+    // return type and loses drawImage. Both branches do hand back a 2d context.
+    const ctx = canvas.getContext("2d") as
+      | OffscreenCanvasRenderingContext2D
+      | CanvasRenderingContext2D
+      | null;
     if (!ctx) throw new Error("no 2d context");
     ctx.drawImage(bitmap, 0, 0, width, height);
     bitmap.close();

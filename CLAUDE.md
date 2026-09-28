@@ -65,6 +65,11 @@ A filterable column-masonry — referenced from formedgardens.com.au/projects. `
 ### Project detail (`/projects/[slug]`)
 `generateStaticParams` over every gallery item. Structure mirrors formedgardens.com.au/project/*: full-bleed `ParallaxImage` hero (with a back link) → info section (category eyebrow, `SplitText` title, 2-paragraph description, and a Location/Completed/Scope-of-work details table beside a feature image) → mixed-size gallery (`projectImages`, full-width + half tiles via `ParallaxImage`) → "More projects" (3 next items as hover-caption tiles). All copy/images for items without a `summary` are generated — replace with real content.
 
+### Contact form
+`/contact`'s enquiry form is a client component (`(site)/contact/ContactForm.tsx`) posting to the `sendEnquiry` server action in `(site)/contact/_actions/enquiry.ts`. The action is **public** — no `requireSession()`, unlike every admin action — so it does its own defending: `Enquiry` in `schemas.ts` caps every field, an off-screen honeypot input absorbs bots, and `enquiryRate()` (`ratelimit.ts`, same KV namespace as the login throttle, 5/hour per IP) bounds how much of the metered email quota one caller can burn. The throttle fails open, as the login one does.
+
+Delivery is Resend's REST API over plain `fetch` — no SDK in the Worker bundle — to `brand.email`, with `reply_to` set to the sender so replying from the inbox reaches the customer. `RESEND_API_KEY` is a **Worker secret**, read at request time; `ENQUIRY_FROM` optionally overrides the From label — a sender identity on a Resend-verified domain, backed by no mailbox, and never the destination. The receiving inbox (`brand.email`) is a Google Workspace mailbox per the domain's MX; the site only ever sends *to* it, so Resend’s "Enable Receiving" must stay off or its MX records would take over inbound mail. The email body is plain text on purpose: every value in it is attacker-controlled and text has no markup to escape into. Nothing is persisted — a failed send tells the visitor to phone or email instead, rather than reporting success for a message no one will read.
+
 ## Admin
 
 Route map, all under `(admin)/admin/`:
