@@ -632,7 +632,7 @@
     will-change: transform;
     z-index: 5;
   }
-  @media (hover: none) {
+  @media (hover: none), (pointer: coarse) {
     .cursor-stage {
       cursor: auto;
     }
@@ -696,7 +696,7 @@
     mix-blend-mode: difference;
     opacity: 0.6;
   }
-  @media (hover: none) {
+  @media (hover: none), (pointer: coarse) {
     .cursor-dot,
     .cursor-ring {
       display: none;

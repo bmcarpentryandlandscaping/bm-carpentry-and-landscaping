@@ -1,20 +1,56 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 /**
  * Subtle two-part custom cursor: a hard dot tracking the pointer in
  * real time and a softer trailing ring that lags via lerp. Ring scales
  * up over interactive elements (anything with `[data-cursor="hover"]`
- * or anchors/buttons). Hidden on touch devices.
+ * or anchors/buttons).
+ *
+ * Nothing is RENDERED unless the device has a real pointer. Returning early
+ * from the effect is not enough: the dot and ring would still be in the DOM,
+ * just never moved, leaving them parked wherever CSS put them — which is what
+ * put a stray ring in the middle of a phone screen. The `(hover: none)` rule in
+ * globals.css hid that on most phones, but a browser in "Desktop site" mode
+ * reports hover, and the parked ring came straight back.
+ *
+ * A real `touchstart` is treated as proof of a touch device and retires the
+ * cursor for the session, whatever the media queries claim.
  */
 export function Cursor() {
   const dotRef = useRef<HTMLDivElement | null>(null);
   const ringRef = useRef<HTMLDivElement | null>(null);
+  // Starts false so the server renders nothing and a touch device never sees a
+  // frame of it. A mouse gets the cursor a tick later, on hydration.
+  const [enabled, setEnabled] = useState(false);
 
   useEffect(() => {
-    if (window.matchMedia("(hover: none)").matches) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const pointer = window.matchMedia("(hover: hover) and (pointer: fine)");
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    const sync = () => setEnabled(pointer.matches && !reduced.matches);
+    sync();
+
+    // Plugging in or unplugging a mouse flips these, so follow them rather than
+    // reading once at mount.
+    pointer.addEventListener("change", sync);
+    reduced.addEventListener("change", sync);
+
+    // One real touch outranks every media query, including a phone lying about
+    // hover in desktop mode.
+    const onTouch = () => setEnabled(false);
+    window.addEventListener("touchstart", onTouch, { passive: true, once: true });
+
+    return () => {
+      pointer.removeEventListener("change", sync);
+      reduced.removeEventListener("change", sync);
+      window.removeEventListener("touchstart", onTouch);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!enabled) return;
 
     let mx = window.innerWidth / 2;
     let my = window.innerHeight / 2;
@@ -65,7 +101,9 @@ export function Cursor() {
       document.removeEventListener("pointerout", leaveInteractive, true);
       cancelAnimationFrame(raf);
     };
-  }, []);
+  }, [enabled]);
+
+  if (!enabled) return null;
 
   return (
     <>
